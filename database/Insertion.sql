@@ -7,4 +7,3 @@ VALUES ('ale_a_jacta_est_', 'valentincuzin@murena.io', 'azerty', CURRENT_DATE, C
 -- create a Document
 INSERT INTO "document" ( path, name, type, fileSize, createdAt, lastModifiedAt, lastVisitedAt, pseudonym )
 VALUES ('/doctest.md', 'doctest', 'markdown', 12, CURRENT_DATE, CURRENT_DATE, CURRENT_DATE, 'ale_a_jacta_est_');
-
