@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Éditeur Markdown avec SimpleMDE</title>
+	<a href="./markdown">editeur</a>
+	<a href="./connexion">connexion</a>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+</head>
+<body>
+
+	<form action="/formConnexion" method="post">
+		<div>
+			<label for="mail">e-mail :</label>
+			<input type="email" id="mail" name="mail">
+		</div>
+		<div>
+			<label for="password">Password :</label>
+			<textarea type="password" id="password" name="password"></textarea>
+		</div>
+		<div class="button">
+			<button type="submit">Se Connecter</button>
+		</div>
+	</form>
+	
+
+</body>
+</html>
