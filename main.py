@@ -4,6 +4,7 @@ import markdown
 import database.data as DB
 
 app = Flask(__name__)
+DB.initConnection(app)
 
 @app.route('/markdown', methods=['GET', 'POST'])
 def index():
@@ -23,6 +24,6 @@ def connexion():
 
 @app.route("/formConnexion", methods=['POST'])
 def TryConnexion():
-    DB.sendFormConnexion(request_=request)
+    DB.sendFormConnection(request_=request)
     return ("",204)
 app.run(debug=True)

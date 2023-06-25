@@ -52,3 +52,7 @@ CREATE TABLE Evaluate(
    FOREIGN KEY(pseudonym) REFERENCES Account(pseudonym),
    FOREIGN KEY(path) REFERENCES Document(path)
 );
+
+/* for crypting password */
+CREATE EXTENSION pgcrypto;
+SELECT * FROM pg_available_extensions;
