@@ -12,6 +12,20 @@ def initConnection(app : Flask):
     app.config["SQLALCHEMY_DATABASE_URI"] = f'postgresql://{connect["user"]}:{connect["password"]}@{connect["host"]}:{connect["port"]}/{connect["database"]}'
     db.init_app(app)
 
+def testConnection(app : Flask):
+    # Effectuer une requête simple pour tester la connexion
+    try:
+        with app.app_context():
+            db.session.execute(text("SELECT 1"))
+            db.session.commit()
+
+        # La connexion a été établie avec succès
+        print(f"Connection is Perfect")
+
+    except Exception as e:
+        # Une erreur s'est produite lors de la connexion
+        print(f"Erreur lors de la connexion à la base de données : {str(e)}")
+
 def sendFormConnection(request_ : request):
     """ Send request for connection """
     mail : str = request_.form['mail']

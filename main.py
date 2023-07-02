@@ -5,6 +5,7 @@ import database.data as DB
 
 app = Flask(__name__)
 DB.initConnection(app)
+DB.testConnection(app)
 
 @app.route('/markdown', methods=['GET', 'POST'])
 def index():
