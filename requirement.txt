@@ -1,0 +1,7 @@
+fastapi[all]
+sqlalchemy
+databases
+asyncpg
+six
+requests
+numpy

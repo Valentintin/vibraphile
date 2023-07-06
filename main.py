@@ -1,30 +1,41 @@
-from flask import Flask, render_template, request
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 import markdown
+import uvicorn
 
 import database.data as DB
 
-app = Flask(__name__)
-DB.initConnection(app)
-DB.testConnection(app)
+app = FastAPI()
+templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
-@app.route('/markdown', methods=['GET', 'POST'])
-def index():
-    if request.method == 'POST':
-        text = request.form['markdown']
-        html = markdown.markdown(text)
-        return render_template('markdown.html', markdown=text, html=html)
-    return render_template('markdown.html')
+@app.on_event("startup")
+async def startup():
+    await DB.initConnection()
 
-@app.route("/")
-def home():
-    return render_template('index.html')
+@app.on_event("shutdown")
+async def shutdown():
+    await DB.closeDatabaseConnection()
 
-@app.route("/connexion", methods=['GET'])
-def connexion():
-    return render_template('connexion.html')
+@app.get('/markdown')
+async def markdown(request: Request):
+    return templates.TemplateResponse('markdown.html', {'request': request})
 
-@app.route("/formConnexion", methods=['POST'])
-def TryConnexion():
-    DB.sendFormConnection(request_=request)
-    return ("",204)
-app.run(debug=True)
+@app.get("/")
+async def home(request: Request):
+    return templates.TemplateResponse('index.html', {"request": request})
+
+@app.get("/connexion")
+async def connexion(request: Request):
+    return templates.TemplateResponse('connexion.html', {"request": request})
+
+@app.post("/formConnexion")
+async def TryConnexion(request: Request):
+    form = await request.form()
+    await DB.sendFormConnection(form_=form)
+    return HTMLResponse(status_code=204)
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
