@@ -1,13 +1,16 @@
-from fastapi import Form
 from sqlalchemy import text
 from databases import Database
 from asyncpg.exceptions import PostgresError
 import json
+import os
 
 db: Database = None
 
 async def initConnection():
     """ initialise the connection at the database """
+    if not os.path.exists('database/config.json'):
+        print("You need to have the file config.json in database/")
+        return
     with open('database/config.json') as configConnection:
         connectInfo : json = json.load(configConnection)
     DATABASE_URL : str = f'postgresql://{connectInfo["user"]}:{connectInfo["password"]}@{connectInfo["host"]}:{connectInfo["port"]}/{connectInfo["database"]}'
@@ -30,18 +33,22 @@ async def closeDatabaseConnection():
     """ disconnect at the database """
     await db.disconnect()
 
-async def sendFormConnection(form_ : Form):
+async def sendFormConnection(form_ : json):
     """ Send request for connection """
     mail : str = form_['mail']
     password : str = form_['password']
     try : 
         query : text = text(f"SELECT * FROM Account WHERE email = '{mail}' AND password = crypt('{password}', password); ")
-        print(query)
         results = await db.fetch_one(query)
+        results: dict = dict(results)
+        results.pop("password")
+        feedback : str
         if results is None:
-            print("bad email or password...")
+            feedback = "bad email or password..." 
         else:
-            print(f"voici les infos du comptes {dict(results)} : ")
+            feedback = f"voici les infos du comptes : {results}"
+        print(feedback)
+        return feedback
     except PostgresError as e:
         print(f"Error from the database : {str(e)}")
     except Exception as e:
