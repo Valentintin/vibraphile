@@ -86,3 +86,26 @@ async def sendFormAccountCreation(form_ : json) -> str:
     except Exception as e:
         print(f"Error : {str(e)}")
         raise
+
+async def sendFormAccountDelete(form_ : json) -> str:
+    """ Send request for delete an account """
+    pseudonym : str = form_['pseudonym']
+    password : str = form_['password']
+    try :
+
+        # Verification for unique pseudonym and password
+        account_query = text(f"SELECT email FROM Account WHERE pseudonym = '{pseudonym}' AND password = crypt('{password}', password);")
+        account_result = await db.fetch_one(account_query)
+        feedback : str
+        if not account_result:
+            return "bad password or pseudonym"
+        # delete an account
+        query : text = text(f""" DELETE FROM "account" WHERE pseudonym = '{pseudonym}'; """)
+        await db.execute(query)
+        return "account deleted successfully !"
+    except PostgresError as e:
+        print(f"Error from the database : {str(e)}")
+        raise
+    except Exception as e:
+        print(f"Error : {str(e)}")
+        raise

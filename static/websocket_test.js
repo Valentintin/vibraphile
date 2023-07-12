@@ -29,6 +29,19 @@ function accountCreation(event) {
     ws.send(JSON.stringify(input));
 }
 
+function accountDelete(event) {
+    event.preventDefault(); //don't use default event
+    let pseudonym = document.getElementById("pseudonymDelete");
+    let password = document.getElementById("passwordDelete");
+    let input = {
+        "id" : "accountDelete",
+        "pseudonym" : pseudonym.value,
+        "password" : password.value
+    };
+    console.log("delete account")
+    ws.send(JSON.stringify(input));
+}
+
 // connection event
 ws.onopen = () => {
     console.log('Connected at the websocket');

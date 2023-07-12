@@ -36,18 +36,21 @@ async def connexion(request: Request):
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     shutdown : bool = False
+    response : str = ""
     while not shutdown:
         try:
             data : json = await websocket.receive_json()
             if data["id"] == "connection":
-                response : str = await DB.sendFormConnection(form_=data)
-                await websocket.send_text(json.dumps({"id" : data["id"], "message": response}))
+                response = await DB.sendFormConnection(form_=data)
             elif data["id"] == "accountCreation":
-                response : str = await DB.sendFormAccountCreation(form_=data)
-                print(f'Response for {data["id"]} call is : {response}')
-                await websocket.send_text(json.dumps({"id" : data["id"], "message": response}))
+                response = await DB.sendFormAccountCreation(form_=data)
+            elif data["id"] == "accountDelete":
+                response = await DB.sendFormAccountDelete(form_=data)
             else:
                 print("back-end not yet implemented")
+                break
+            print(f'Response for {data["id"]} call is : {response}')
+            await websocket.send_text(json.dumps({"id" : data["id"], "message": response}))
         except WebSocketDisconnect as e:
             shutdown = True
 
