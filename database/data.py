@@ -51,5 +51,38 @@ async def sendFormConnection(form_ : json) -> str:
         return feedback
     except PostgresError as e:
         print(f"Error from the database : {str(e)}")
+        raise
     except Exception as e:
         print(f"Error : {str(e)}")
+        raise
+
+async def sendFormAccountCreation(form_ : json) -> str:
+    """ Send request for create a new account """
+    pseudonym : str = form_['pseudonym']
+    mail : str = form_['mail']
+    password : str = form_['password']
+    birthDate : str = form_['birthDate']
+    try :
+
+        # Verification for unique email and pseudonym
+        email_query = text(f"""SELECT email FROM "account" WHERE email = '{mail}'""")
+        email_result = await db.fetch_one(email_query)
+        feedback : str
+        if email_result:
+            return "this email is already associted with an account"
+        else:
+            pseudonym_query = text(f"""SELECT pseudonym FROM "account" WHERE pseudonym = '{pseudonym}'""")
+            pseudonym_result = await db.fetch_one(pseudonym_query)
+            if pseudonym_result:
+                return "this pseudonym is already associted with an account"
+        
+        # create a new account
+        query : text = text(f""" INSERT INTO "account" (pseudonym, email, password, createdAt, lastLoginAt, birthDate, picture) VALUES ('{pseudonym}', '{mail}', crypt('{password}', gen_salt('bf')), CURRENT_DATE, CURRENT_DATE, '{birthDate}', ''); """)
+        await db.execute(query)
+        return "account created successfully !"
+    except PostgresError as e:
+        print(f"Error from the database : {str(e)}")
+        raise
+    except Exception as e:
+        print(f"Error : {str(e)}")
+        raise

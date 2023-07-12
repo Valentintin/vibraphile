@@ -42,6 +42,10 @@ async def websocket_endpoint(websocket: WebSocket):
             if data["id"] == "connection":
                 response : str = await DB.sendFormConnection(form_=data)
                 await websocket.send_text(json.dumps({"id" : data["id"], "message": response}))
+            elif data["id"] == "accountCreation":
+                response : str = await DB.sendFormAccountCreation(form_=data)
+                print(f'Response for {data["id"]} call is : {response}')
+                await websocket.send_text(json.dumps({"id" : data["id"], "message": response}))
             else:
                 print("back-end not yet implemented")
         except WebSocketDisconnect as e:
