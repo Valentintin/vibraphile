@@ -26,26 +26,26 @@ async def testDatabaseConnection():
         await db.fetch_all(query)
         print("Database connection successful!")
     except Exception as e: 
-        print("Error connecting to the database:", e)
+        print(f"Error connecting to the database: {str(e)}")
         raise
 
 async def closeDatabaseConnection():
     """ disconnect at the database """
     await db.disconnect()
 
-async def sendFormConnection(form_ : json):
+async def sendFormConnection(form_ : json) -> str:
     """ Send request for connection """
     mail : str = form_['mail']
     password : str = form_['password']
     try : 
         query : text = text(f"SELECT * FROM Account WHERE email = '{mail}' AND password = crypt('{password}', password); ")
         results = await db.fetch_one(query)
-        results: dict = dict(results)
-        results.pop("password")
         feedback : str
         if results is None:
             feedback = "bad email or password..." 
         else:
+            results: dict = dict(results)
+            results.pop("password")
             feedback = f"voici les infos du comptes : {results}"
         print(feedback)
         return feedback
