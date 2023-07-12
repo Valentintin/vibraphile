@@ -36,7 +36,7 @@ ws.onopen = () => {
 
 // close connection event
 ws.onclose = (event) => {
-    console.log('Disconnected at the websocket', event);
+    console.log('Disconnected at the websocket');
 }
 
 // handle reception messages
