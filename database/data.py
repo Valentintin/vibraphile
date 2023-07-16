@@ -4,12 +4,15 @@ from asyncpg.exceptions import PostgresError
 import json
 import os
 
-db: Database = None
+db : Database = None
+
+from logging import getLogger
+logger = getLogger("musehik")
 
 async def initConnection():
     """ initialise the connection at the database """
     if not os.path.exists('database/config.json'):
-        print("You need to have the file config.json in database/")
+        logger.debug("You need to have the file config.json in database/")
         return
     with open('database/config.json') as configConnection:
         connectInfo : json = json.load(configConnection)
@@ -24,9 +27,9 @@ async def testDatabaseConnection():
     try:
         query = text("SELECT 1")
         await db.fetch_all(query)
-        print("Database connection successful!")
+        logger.info("Database connection successful!")
     except Exception as e: 
-        print(f"Error connecting to the database: {str(e)}")
+        logger.error(f"Error connecting to the database: {str(e)}")
         raise
 
 async def closeDatabaseConnection():
@@ -47,13 +50,12 @@ async def sendFormConnection(form_ : json) -> str:
             results: dict = dict(results)
             results.pop("password")
             feedback = f"voici les infos du comptes : {results}"
-        print(feedback)
         return feedback
     except PostgresError as e:
-        print(f"Error from the database : {str(e)}")
+        logger.exception("An error occurred from the dataBase\n", exc_info=e)
         raise
     except Exception as e:
-        print(f"Error : {str(e)}")
+        logger.exception("An error occurred\n", exc_info=e)
         raise
 
 async def sendFormAccountCreation(form_ : json) -> str:
@@ -67,7 +69,6 @@ async def sendFormAccountCreation(form_ : json) -> str:
         # Verification for unique email and pseudonym
         email_query = text(f"SELECT email FROM Account WHERE email = '{mail}'")
         email_result = await db.fetch_one(email_query)
-        feedback : str
         if email_result:
             return "this email is already associted with an account"
         else:
@@ -81,10 +82,10 @@ async def sendFormAccountCreation(form_ : json) -> str:
         await db.execute(query)
         return "account created successfully !"
     except PostgresError as e:
-        print(f"Error from the database : {str(e)}")
+        logger.exception("An error occurred from the database\n", exc_info=e)
         raise
     except Exception as e:
-        print(f"Error : {str(e)}")
+        logger.exception("An error occurred\n", exc_info=e)
         raise
 
 async def sendFormAccountDelete(form_ : json) -> str:
@@ -96,7 +97,6 @@ async def sendFormAccountDelete(form_ : json) -> str:
         # Verification for unique pseudonym and password
         account_query = text(f"SELECT email FROM Account WHERE pseudonym = '{pseudonym}' AND password = crypt('{password}', password);")
         account_result = await db.fetch_one(account_query)
-        feedback : str
         if not account_result:
             return "bad password or pseudonym"
         # delete an account
@@ -104,8 +104,8 @@ async def sendFormAccountDelete(form_ : json) -> str:
         await db.execute(query)
         return "account deleted successfully !"
     except PostgresError as e:
-        print(f"Error from the database : {str(e)}")
+        logger.exception("An error occurred from the database\n", exc_info=e)
         raise
     except Exception as e:
-        print(f"Error : {str(e)}")
+        logger.exception("An error occurred\n", exc_info=e)
         raise
