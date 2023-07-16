@@ -8,6 +8,11 @@ import json
 
 import database.data as DB
 
+from logs.log_config import init_logger
+init_logger()
+from logging import getLogger
+logger = getLogger("musehik")
+
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -47,9 +52,9 @@ async def websocket_endpoint(websocket: WebSocket):
             elif data["id"] == "accountDelete":
                 response = await DB.sendFormAccountDelete(form_=data)
             else:
-                print("back-end not yet implemented")
+                logger.error("back-end not yet implemented")
                 break
-            print(f'Response for {data["id"]} call is : {response}')
+            logger.debug(f'Response for {data["id"]} call is : {response}')
             await websocket.send_text(json.dumps({"id" : data["id"], "message": response}))
         except WebSocketDisconnect as e:
             shutdown = True
