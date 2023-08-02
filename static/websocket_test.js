@@ -1,4 +1,5 @@
 const ws = new WebSocket("ws://localhost:8000/ws");
+let Token = document.cookie
 
 function connection(event) {
     event.preventDefault(); //don't use default event
@@ -8,6 +9,15 @@ function connection(event) {
         "id" : "connection",
         "mail" : mail.value,
         "password" : password.value
+    };
+    ws.send(JSON.stringify(input));
+}
+
+function testConnection(event) {
+    event.preventDefault(); //don't use default event
+    let input = {
+        "id" : "testConnection",
+        "Token" : Token
     };
     ws.send(JSON.stringify(input));
 }
@@ -56,4 +66,8 @@ ws.onclose = (event) => {
 ws.onmessage = (event) => {
     let message = JSON.parse(event.data);
     console.log('from the back for', message["id"] + '\n', message["message"]);
+    if (message["id"] == "connection"){
+        Token = message["message"]["Token"]
+        document.cookie = Token
+    }
 };

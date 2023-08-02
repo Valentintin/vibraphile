@@ -4,6 +4,8 @@ from asyncpg.exceptions import PostgresError
 import json
 import os
 
+import database.token as tk
+
 db : Database = None
 
 from logging import getLogger
@@ -17,6 +19,7 @@ async def initConnection():
     with open('database/config.json') as configConnection:
         connectInfo : json = json.load(configConnection)
     DATABASE_URL : str = f'postgresql://{connectInfo["user"]}:{connectInfo["password"]}@{connectInfo["host"]}:{connectInfo["port"]}/{connectInfo["database"]}'
+    await tk.initSECRET_KEY(connectInfo["password"])
     global db
     db = Database(DATABASE_URL)
     await db.connect()
@@ -36,27 +39,37 @@ async def closeDatabaseConnection():
     """ disconnect at the database """
     await db.disconnect()
 
-async def sendFormConnection(form_ : json) -> str:
+async def sendFormConnection(form_ : json) -> str|dict:
     """ Send request for connection """
     mail : str = form_['mail']
     password : str = form_['password']
     try : 
         query : text = text(f"SELECT * FROM Account WHERE email = '{mail}' AND password = crypt('{password}', password); ")
         results = await db.fetch_one(query)
-        feedback : str
         if results is None:
-            feedback = "bad email or password..." 
+            return "bad email or password..." 
         else:
+            # Treat the results before send it
             results: dict = dict(results)
             results.pop("password")
-            feedback = f"voici les infos du comptes : {results}"
-        return feedback
+            results["createdat"] = results["createdat"].isoformat()
+            results["lastloginat"] = results["lastloginat"].isoformat()
+            results["birthdate"] = results["birthdate"].isoformat()
+            results["Token"] : str = tk.generate_token(results["pseudonym"])
+            return results
     except PostgresError as e:
         logger.exception("An error occurred from the dataBase\n", exc_info=e)
         raise
     except Exception as e:
         logger.exception("An error occurred\n", exc_info=e)
         raise
+
+async def testConnection(form_ : json) -> str:
+    """ test the connection with token """
+    if tk.verify_token(form_["Token"]):
+        return "connected !"
+    else:
+        return "not connected"
 
 async def sendFormAccountCreation(form_ : json) -> str:
     """ Send request for create a new account """
