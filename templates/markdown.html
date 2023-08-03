@@ -6,11 +6,13 @@
 	<a href="./connexion">connexion</a>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
 	<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+	<script type="module" src="{{ url_for('static', path='websocket_test.js') }}"></script>
+
 </head>
 <body>
-    <h1>Éditeur Markdown avec EasyMDE</h1>
+    <h1 id="file-title">untilted.md</h1>
 
-	<script src="{{ url_for('static', path='markdown.js') }}"></script>
+	<textarea id="markdown-editor"></textarea>
 
 </body>
 </html>

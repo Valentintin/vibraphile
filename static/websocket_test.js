@@ -52,6 +52,20 @@ function accountDelete(event) {
     ws.send(JSON.stringify(input));
 }
 
+function saveDocument(fileName, data) {
+    let type = "md";
+    let input = {
+        "id" : "saveDocument",
+        "Token" : Token,
+        "name" : fileName,
+        "type" : type,
+        "data" : data,
+        "is_new" : true
+    };
+    console.log("save document");
+    ws.send(JSON.stringify(input));
+}
+
 // connection event
 ws.onopen = () => {
     console.log('Connected at the websocket');
@@ -71,3 +85,35 @@ ws.onmessage = (event) => {
         document.cookie = Token
     }
 };
+
+//This file create a interactive markdown's editor for the WebSite
+
+const easymde = new EasyMDE({
+    toolbar: [
+        "bold",
+        "italic",
+        "heading",
+        "|",
+        {
+          name: "save",
+          action: function customSaveButton(editor) {
+            const fileName = prompt("Veuillez saisir un nom de fichier :", "document1");
+            document.getElementById("file-title").textContent = fileName.trim();
+            saveDocument(fileName, editor.value())
+            alert("Contenu sauvegardé : " + editor.value());
+          },
+          className: "fa fa-save",
+          title: "Sauvegarder",
+        },
+    ],
+    element: document.getElementById('markdown-editor'),
+    autofocus: true,
+    autosave: {
+        enabled: true,
+        uniqueId: "AutoSavedMarkdown",
+        text: "Autosaved: ",
+    },
+    tabSize: 4,
+    lineNumbers: true,
+    sideBySideFullscreen: false,
+});

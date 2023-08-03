@@ -39,6 +39,8 @@ async def closeDatabaseConnection():
     """ disconnect at the database """
     await db.disconnect()
 
+### Account ###
+
 async def sendFormConnection(form_ : json) -> str|dict:
     """ Send request for connection """
     mail : str = form_['mail']
@@ -93,6 +95,7 @@ async def sendFormAccountCreation(form_ : json) -> str:
         # create a new account
         query : text = text(f"INSERT INTO Account (pseudonym, email, password, createdAt, lastLoginAt, birthDate, picture) VALUES ('{pseudonym}', '{mail}', crypt('{password}', gen_salt('bf')), CURRENT_DATE, CURRENT_DATE, '{birthDate}', '');")
         await db.execute(query)
+        os.makedirs(f"database/Storage/{pseudonym}", exist_ok=True)
         return "account created successfully !"
     except PostgresError as e:
         logger.exception("An error occurred from the database\n", exc_info=e)
@@ -116,6 +119,40 @@ async def sendFormAccountDelete(form_ : json) -> str:
         query : text = text(f""" DELETE FROM "account" WHERE pseudonym = '{pseudonym}'; """)
         await db.execute(query)
         return "account deleted successfully !"
+    except PostgresError as e:
+        logger.exception("An error occurred from the database\n", exc_info=e)
+        raise
+    except Exception as e:
+        logger.exception("An error occurred\n", exc_info=e)
+        raise
+
+### Documents ###
+
+async def saveDocument(form_ : json) -> str:
+    """ Send request for save a new document """
+    # Verify connexion
+    pseudonym : str = tk.verify_token(form_['Token'])
+    if not pseudonym:
+        return "you need to be connected"
+    # build the path
+    name : str = form_['name']
+    type : str = form_['type']
+    path : str = f"database/Storage/{pseudonym}/{name}.{type}"
+    # Verification for unique path
+    if os.path.exists(path) and not form_['is_new']:
+        return f"this document is already existing with the same path : {path} \n do you want to erase it ?"
+    # Save the documents
+    with open(path, "w") as f:
+        f.write(form_['data'])
+    # make a new row in database
+    fileSize : int = os.path.getsize(path)
+    try:
+        if form_['is_new']:
+            query : text = text(f"INSERT INTO document ( path, name, type, fileSize, createdAt, lastModifiedAt, lastVisitedAt, pseudonym ) VALUES ('{path}', '{name}', '{type}', {fileSize}, CURRENT_DATE, CURRENT_DATE, CURRENT_DATE, '{pseudonym}');")
+        else:
+            query : text = text(f"UPDATE document SET fileSize = {fileSize}, lastModifiedAt = CURRENT_DATE, lastVisitedAt = CURRENT_DATE WHERE path = '{path}';")
+        await db.execute(query)
+        return "Document save successfully !"
     except PostgresError as e:
         logger.exception("An error occurred from the database\n", exc_info=e)
         raise

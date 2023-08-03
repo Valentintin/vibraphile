@@ -10,7 +10,7 @@ async def initSECRET_KEY(secret_key : str):
     """ init the SECRET_KEY used for security of token """
     global SECRET_KEY
     SECRET_KEY = secret_key
-    logger.debug("SECRET_KEY init")
+    logger.info("SECRET_KEY init")
 
 def generate_token(pseudonym : str) -> str:
     """ generate a new token for a pseudonym """
@@ -31,12 +31,12 @@ def verify_token(token: str) -> bool:
         pseudonym = payload.get("pseudonym")
         if not pseudonym:
             logger.error("pseudonym doesn't exist")
-            return False
+            return ""
         logger.info("token is valid")
-        return True
+        return pseudonym
     except jwt.ExpiredSignatureError:
         logger.error("Token has expired")
-        return False
+        return ""
     except jwt.InvalidTokenError:
         logger.error("Invalid token")
-        return False
+        return ""
