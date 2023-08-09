@@ -159,3 +159,33 @@ async def saveDocument(form_ : json) -> str:
     except Exception as e:
         logger.exception("An error occurred\n", exc_info=e)
         raise
+
+async def retrive_doc(form_ : json) -> str|list:
+    """ this function answer to request of documents for a specific user """
+    # Verify connexion
+    pseudonym : str = tk.verify_token(form_['Token'])
+    if not pseudonym:
+        return "you need to be connected"
+    # make a request
+    try :
+        if form_['name']:
+            doc_query = text(f"SELECT path FROM Document WHERE pseudonym = '{pseudonym}' AND name = '{form_['name']}'")
+            doc_result = await db.fetch_one(doc_query)
+            if not doc_result:
+                return "no documents..."
+            with open(doc_result.path, "r") as f:
+                doc_content = f.read()
+            return doc_content
+        else:
+            doc_query = text(f"SELECT name FROM Document WHERE pseudonym = '{pseudonym}'")
+            doc_result = await db.fetch_all(doc_query)
+            if not doc_result:
+                return "no documents..."
+            name_doc : list = [doc["name"] for doc in doc_result]
+            return name_doc
+    except PostgresError as e:
+        logger.exception("An error occurred from the database\n", exc_info=e)
+        raise
+    except Exception as e:
+        logger.exception("An error occurred\n", exc_info=e)
+        raise

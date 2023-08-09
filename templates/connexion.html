@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Éditeur Markdown avec SimpleMDE</title>
+    <title>Vibraphile</title>
 	<a href="./markdown">editeur</a>
 	<a href="./connexion">connexion</a>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
-	<script src="{{ url_for('static', path='websocket_test.js') }}"></script>
+	<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
 </head>
 <body>
 	<h2>connectez-vous:</h2>
@@ -70,5 +70,23 @@
 			<button>Se Connecter</button>
 		</div>
 	</form>
+	<h2>your documents</h2>
+	<table id="doc_list">
+		<tr>
+		  <th>Nom du Document</th>
+		  <th>Actions</th>
+		</tr>
+		
+	</table>
+	<br>
+	<br>
+	<br>
+	<h1 id="file_title">untilted.md</h1>
+
+	<textarea id="markdown-editor"></textarea>
+
+
+
+	<script src="{{ url_for('static', path='websocket_test.js') }}"></script>
 </body>
 </html>
