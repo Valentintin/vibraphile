@@ -3,21 +3,50 @@ let Token = document.cookie
 
 const easymde = new EasyMDE({
     toolbar: [
+        "heading",
         "bold",
         "italic",
-        "heading",
+        "quote",
+        "unordered-list",
+        "ordered-list",
+        "table",
+        "link",
+        "image",
+        "upload-image",
+        "|",
+        "undo",
+        "redo",
+        "side-by-side",
+        "fullscreen",
         "|",
         {
-        name: "save",
-        action: function customSaveButton(editor) {
-            const fileName = prompt("Veuillez saisir un nom de fichier :", "document1");
-            document.getElementById("file_title").textContent = fileName.trim();
-            saveDocument(fileName, editor.value())
-            alert("Contenu sauvegardé : " + editor.value());
+            name: "save",
+            action: function customSaveButton(editor) {
+                if (document.getElementById("file_title").textContent === "untilted.md"){
+                    var fileName = prompt("Veuillez saisir un nom de fichier :", "document1");
+                    document.getElementById("file_title").textContent = fileName.trim();
+                }
+                else {
+                    var fileName = document.getElementById("file_title").textContent
+                }
+                saveDocument(fileName, editor.value())
+                alert("Contenu sauvegardé : " + editor.value());
+            },
+            
+            className: "fa fa-save",
+            title: "Sauvegarder",
         },
-        className: "fa fa-save",
-        title: "Sauvegarder",
+        {
+            name: "new doc",
+            action: function customeNewDocButton(editor) {
+                document.getElementById("file_title").textContent = "untilted.md"
+                editor.value("")
+            },
+            
+            className: "fa fa-file-text",
+            title: "create a new doc",
         },
+        "guide",
     ],
     element: document.getElementById('markdown-editor'),
     autofocus: true,
