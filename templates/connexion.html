@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vibraphile</title>
+	<a href="./connexion">connexion</a>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+</head>
+<body>
+	<div>
+		<h2>connectez-vous:</h2>
+		<form action="" onsubmit="connection(event)">
+			<div>
+				<label for="mailConnection">e-mail :</label>
+				<input type="email" id="mailConnection" name="mailConnection">
+			</div>
+			<div>
+				<label for="passwordConnection">Password :</label>
+				<input type="password" id="passwordConnection" name="passwordConnection">
+			</div>
+			<div class="button">
+				<button>Se Connecter</button>
+			</div>
+		</form>
+		<form action="" onsubmit="testConnection(event)">
+			<div class="button">
+				<button>tester connection</button>
+			</div>
+		</form>
+		<h2>modify some information</h2>
+		<div>
+			<label for="email">actual e-mail: </label>
+			<br>
+			<input type="email" id="email" name="email">
+			<button type="button" id="modify" name="modify" onclick="modify('email')">modify</button>
+			<br><br>
+			<label for="password">password: </label>
+			<br><br>
+			<label for="biography">actual biography: </label>
+			<br>
+			<input type="biography" id="biography" name="biography">
+			<button type="button" id="modify" name="modify" onclick="modify('biography')">modify</button>
+		</div>
+		
+	</div>
+	<br><br><br>
+	<h2>créer un compte</h2>
+	<form action="" onsubmit="accountCreation(event)">
+		<div>
+			<label for="pseudonym">pseudonym :</label>
+			<input type="text" id="pseudonym" name="pseudonym">
+		</div>
+		<div>
+			<label for="mail">e-mail :</label>
+			<input type="email" id="mailCreation" name="mailCreation">
+		</div>
+		<div>
+			<label for="passwordCreation">Password :</label>
+			<input type="password" id="passwordCreation" name="passwordCreation">
+		</div>
+		<div>
+			<label for="birthDate">birthDate :</label>
+			<input type="date" id="birthDate" name="birthDate" max="">
+			<script>// I Don't like to put script here. TODO : Clean
+				let currentDate = new Date();
+				let maxBirthDate = new Date(currentDate.getFullYear() - 13, currentDate.getMonth(), currentDate.getDate());
+				let dateString = maxBirthDate.toISOString().split('T')[0];
+				document.getElementById("birthDate").max = dateString;
+			</script>
+		</div>
+		<div class="button">
+			<button>Créer son compte</button>
+		</div>
+	</form>
+	<h2>Supprimer un compte</h2>
+	<form action="" onsubmit="accountDelete(event)">
+		<div>
+			<label for="pseudonymDelete">pseudonym</label>
+			<input type="text" id="pseudonymDelete" name="pseudonymDelete">
+		</div>
+		<div>
+			<label for="passwordDelete">Password :</label>
+			<input type="password" id="passwordDelete" name="passwordDelete">
+		</div>
+		<div class="button">
+			<button>Se Connecter</button>
+		</div>
+	</form>
+	<h2>your documents</h2>
+	<table id="doc_list">
+		<tr>
+		  <th>Nom du Document</th>
+		  <th>Actions</th>
+		</tr>
+		
+	</table>
+	<br>
+	<br>
+	<br>
+	<h1 id="file_title">untilted.md</h1>
+
+	<textarea id="markdown-editor"></textarea>
+
+
+
+	<script src="{{ url_for('static', path='websocket_test.js') }}"></script>
+</body>
+</html>
