@@ -7,25 +7,42 @@
 	<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
 </head>
 <body>
-	<h2>connectez-vous:</h2>
-	<form action="" onsubmit="connection(event)">
+	<div>
+		<h2>connectez-vous:</h2>
+		<form action="" onsubmit="connection(event)">
+			<div>
+				<label for="mailConnection">e-mail :</label>
+				<input type="email" id="mailConnection" name="mailConnection">
+			</div>
+			<div>
+				<label for="passwordConnection">Password :</label>
+				<input type="password" id="passwordConnection" name="passwordConnection">
+			</div>
+			<div class="button">
+				<button>Se Connecter</button>
+			</div>
+		</form>
+		<form action="" onsubmit="testConnection(event)">
+			<div class="button">
+				<button>tester connection</button>
+			</div>
+		</form>
+		<h2>modify some information</h2>
 		<div>
-			<label for="mail">e-mail :</label>
-			<input type="email" id="mail" name="mail">
+			<label for="email">actual e-mail: </label>
+			<br>
+			<input type="email" id="email" name="email">
+			<button type="button" id="modify" name="modify" onclick="modify('email')">modify</button>
+			<br><br>
+			<label for="password">password: </label>
+			<br><br>
+			<label for="biography">actual biography: </label>
+			<br>
+			<input type="biography" id="biography" name="biography">
+			<button type="button" id="modify" name="modify" onclick="modify('biography')">modify</button>
 		</div>
-		<div>
-			<label for="password">Password :</label>
-			<input type="password" id="password" name="password">
-		</div>
-		<div class="button">
-			<button>Se Connecter</button>
-		</div>
-	</form>
-	<form action="" onsubmit="testConnection(event)">
-		<div class="button">
-			<button>tester connection</button>
-		</div>
-	</form>
+		
+	</div>
 	<br><br><br>
 	<h2>créer un compte</h2>
 	<form action="" onsubmit="accountCreation(event)">

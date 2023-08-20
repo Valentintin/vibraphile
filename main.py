@@ -57,6 +57,8 @@ async def websocket_endpoint(websocket: WebSocket):
                 response = await DB.sendFormAccountCreation(form_=data)
             elif data["id"] == "accountDelete":
                 response = await DB.sendFormAccountDelete(form_=data)
+            elif data["id"] == "modifyAccount":
+                response = await DB.sendFormModifyAccount(form_=data)
             else:
                 logger.error("back-end not yet implemented")
                 break

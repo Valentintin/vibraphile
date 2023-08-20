@@ -23,7 +23,7 @@ def generate_token(pseudonym : str) -> str:
     logger.debug(f"token generate for {pseudonym} ")
     return token
 
-def verify_token(token: str) -> bool:
+def verify_token(token: str) -> str:
     if not isinstance(token, str):
         logger.error("Token insn't init => user is not connected")
     try:

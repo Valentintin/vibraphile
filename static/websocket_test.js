@@ -63,8 +63,8 @@ const easymde = new EasyMDE({
 
 function connection(event) {
     event.preventDefault(); //don't use default event
-    let mail = document.getElementById("mail");
-    let password = document.getElementById("password");
+    let mail = document.getElementById("mailConnection");
+    let password = document.getElementById("passwordConnection");
     let input = {
         "id" : "connection",
         "mail" : mail.value,
@@ -111,6 +111,22 @@ function accountDelete(event) {
     console.log("delete account")
     ws.send(JSON.stringify(input));
 };
+
+function modify(infoModify) {
+    let modification = document.getElementById(infoModify);
+    let input = {
+        "id" : "modifyAccount",
+        "Token" : Token,
+        "infoModify" : infoModify,
+        "modification" : modification.value
+    };
+    console.log("modify account info");
+    if (infoModify !== "password"){
+        let label = document.querySelector("label[for='" + infoModify + "']");
+        label.textContent = "actual "+infoModify+" : "+modification.value
+    }
+    ws.send(JSON.stringify(input));
+}
 
 function saveDocument(fileName, data) {
     let type = "md";

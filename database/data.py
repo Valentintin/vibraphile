@@ -126,6 +126,29 @@ async def sendFormAccountDelete(form_ : json) -> str:
         logger.exception("An error occurred\n", exc_info=e)
         raise
 
+async def sendFormModifyAccount(form_ : json) -> str:
+    """ Send request for modify an Account """
+    pseudonym : str = tk.verify_token(form_['Token'])
+    if pseudonym:
+        pass
+        # see what to modify
+        infoModify : str = form_["infoModify"]
+        modification : str = form_["modification"]
+        logger.debug(f"infoModify : {infoModify} && modification : {modification}")
+        # modify the information
+        try:
+            query : text = text(f"UPDATE account SET {infoModify} = '{modification}' WHERE pseudonym = '{pseudonym}';")
+            await db.execute(query)
+            return "Info updated successfully !"
+        except PostgresError as e:
+            logger.exception("An error occurred from the database\n", exc_info=e)
+            raise
+        except Exception as e:
+            logger.exception("An error occurred\n", exc_info=e)
+            raise
+    else:
+        return "not correctly connected"
+
 ### Documents ###
 
 async def saveDocument(form_ : json) -> str:
