@@ -1,3 +1,4 @@
+#import
 from sqlalchemy import text
 from databases import Database
 from asyncpg.exceptions import PostgresError
@@ -8,34 +9,36 @@ import database.token as tk
 
 db : Database = None
 
+#logger
 from logging import getLogger
 logger = getLogger("musehik")
 
-async def initConnection():
+#setup
+async def init_connection():
     """ initialise the connection at the database """
     if not os.path.exists('database/config.json'):
-        logger.debug("You need to have the file config.json in database/")
+        logger.debug("You need to have the file config.json in database/ . answer access from a developper")
         return
-    with open('database/config.json') as configConnection:
-        connectInfo : json = json.load(configConnection)
-    DATABASE_URL : str = f'postgresql://{connectInfo["user"]}:{connectInfo["password"]}@{connectInfo["host"]}:{connectInfo["port"]}/{connectInfo["database"]}'
-    await tk.initSECRET_KEY(connectInfo["password"])
+    with open('database/config.json') as config_connection:
+        connect_info : json = json.load(config_connection)
+    DATABASE_URL : str = f'postgresql://{connect_info["user"]}:{connect_info["password"]}@{connect_info["host"]}:{connect_info["port"]}/{connect_info["database"]}'
+    await tk.init_SECRET_KEY(connect_info["password"])
     global db
     db = Database(DATABASE_URL)
     await db.connect()
-    await testDatabaseConnection()
+    await test_database_connection()
 
-async def testDatabaseConnection():
+async def test_database_connection():
     """ test the connection at the database """
     try:
         query = text("SELECT 1")
         await db.fetch_all(query)
         logger.info("Database connection successful!")
     except Exception as e: 
-        logger.error(f"Error connecting to the database: {str(e)}")
+        logger.exception(f"Error connecting to the database: {str(e)}")
         raise
 
-async def closeDatabaseConnection():
+async def close_connection():
     """ disconnect at the database """
     await db.disconnect()
 
@@ -66,14 +69,14 @@ async def sendFormConnection(form_ : json) -> str|dict:
         logger.exception("An error occurred\n", exc_info=e)
         raise
 
-async def testConnection(form_ : json) -> str:
+async def test_connection(form_ : json) -> str:
     """ test the connection with token """
     if tk.verify_token(form_["Token"]):
         return "connected !"
     else:
         return "not connected"
 
-async def sendFormAccountCreation(form_ : json) -> str:
+async def account_creation(form_ : json) -> str:
     """ Send request for create a new account """
     pseudonym : str = form_['pseudonym']
     mail : str = form_['mail']
@@ -104,7 +107,7 @@ async def sendFormAccountCreation(form_ : json) -> str:
         logger.exception("An error occurred\n", exc_info=e)
         raise
 
-async def sendFormAccountDelete(form_ : json) -> str:
+async def account_delete(form_ : json) -> str:
     """ Send request for delete an account """
     pseudonym : str = form_['pseudonym']
     password : str = form_['password']
@@ -126,18 +129,18 @@ async def sendFormAccountDelete(form_ : json) -> str:
         logger.exception("An error occurred\n", exc_info=e)
         raise
 
-async def sendFormModifyAccount(form_ : json) -> str:
+async def modify_account(form_ : json) -> str:
     """ Send request for modify an Account """
     pseudonym : str = tk.verify_token(form_['Token'])
     if pseudonym:
         pass
         # see what to modify
-        infoModify : str = form_["infoModify"]
+        info_modify : str = form_["infoModify"]
         modification : str = form_["modification"]
-        logger.debug(f"infoModify : {infoModify} && modification : {modification}")
+        logger.debug(f"infoModify : {info_modify} && modification : {modification}")
         # modify the information
         try:
-            query : text = text(f"UPDATE account SET {infoModify} = '{modification}' WHERE pseudonym = '{pseudonym}';")
+            query : text = text(f"UPDATE account SET {info_modify} = '{modification}' WHERE pseudonym = '{pseudonym}';")
             await db.execute(query)
             return "Info updated successfully !"
         except PostgresError as e:
@@ -151,7 +154,7 @@ async def sendFormModifyAccount(form_ : json) -> str:
 
 ### Documents ###
 
-async def saveDocument(form_ : json) -> str:
+async def save_document(form_ : json) -> str:
     """ Send request for save a new document """
     # Verify connexion
     pseudonym : str = tk.verify_token(form_['Token'])
@@ -168,12 +171,12 @@ async def saveDocument(form_ : json) -> str:
     with open(path, "w") as f:
         f.write(form_['data'])
     # make a new row in database
-    fileSize : int = os.path.getsize(path)
+    file_size : int = os.path.getsize(path)
     try:
         if form_['is_new']:
-            query : text = text(f"INSERT INTO document ( path, name, type, fileSize, createdAt, lastModifiedAt, lastVisitedAt, pseudonym ) VALUES ('{path}', '{name}', '{type}', {fileSize}, CURRENT_DATE, CURRENT_DATE, CURRENT_DATE, '{pseudonym}');")
+            query : text = text(f"INSERT INTO document ( path, name, type, fileSize, createdAt, lastModifiedAt, lastVisitedAt, pseudonym ) VALUES ('{path}', '{name}', '{type}', {file_size}, CURRENT_DATE, CURRENT_DATE, CURRENT_DATE, '{pseudonym}');")
         else:
-            query : text = text(f"UPDATE document SET fileSize = {fileSize}, lastModifiedAt = CURRENT_DATE, lastVisitedAt = CURRENT_DATE WHERE path = '{path}';")
+            query : text = text(f"UPDATE document SET fileSize = {file_size}, lastModifiedAt = CURRENT_DATE, lastVisitedAt = CURRENT_DATE WHERE path = '{path}';")
         await db.execute(query)
         return "Document save successfully !"
     except PostgresError as e:

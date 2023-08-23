@@ -142,11 +142,11 @@ function saveDocument(fileName, data) {
     ws.send(JSON.stringify(input));
 };
 
-function retrive_doc(button=null) {
+function retriveDoc(button=null) {
     if (button) {
         let row = button.parentNode.parentNode;
         var input = {
-            "id" : "retrive_doc",
+            "id" : "retriveDoc",
             "Token" : Token,
             "name" : row.dataset.nom
         }
@@ -155,7 +155,7 @@ function retrive_doc(button=null) {
     }
     else {
         var input = {
-            "id" : "retrive_doc",
+            "id" : "retriveDoc",
             "Token" : Token,
             "name" : ""
         }
@@ -164,14 +164,14 @@ function retrive_doc(button=null) {
     ws.send(JSON.stringify(input));
 };
 
-function set_doc(documents) {
+function setDoc(documents) {
     let table = document.getElementById("doc_list");
     for(let row of documents){
         let new_row = table.insertRow(table.rows.length);
         let cell_nom = new_row.insertCell(0);
         let cell_actions = new_row.insertCell(1);
         cell_nom.innerHTML = row;
-        cell_actions.innerHTML = '<button onclick="retrive_doc(this)">edit</button>';
+        cell_actions.innerHTML = '<button onclick="retriveDoc(this)">edit</button>';
         new_row.dataset.nom = row;
     }
 };
@@ -193,11 +193,11 @@ ws.onmessage = (event) => {
     if (message["id"] == "connection"){
         Token = message["message"]["Token"];
         document.cookie = Token;
-        retrive_doc();
+        retriveDoc();
     }
-    if (message["id"] == "retrive_doc"){
+    if (message["id"] == "retriveDoc"){
         if (typeof message["message"] === typeof [] ){
-            set_doc(message["message"]);
+            setDoc(message["message"]);
         }
         else{
             if (easymde !== null){

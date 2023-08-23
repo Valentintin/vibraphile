@@ -1,12 +1,14 @@
+#import
 import jwt
 import datetime
 
 SECRET_KEY : str = None
 
+#logger
 from logging import getLogger
 logger = getLogger("musehik")
 
-async def initSECRET_KEY(secret_key : str):
+async def init_SECRET_KEY(secret_key : str):
     """ init the SECRET_KEY used for security of token """
     global SECRET_KEY
     SECRET_KEY = secret_key
@@ -14,7 +16,7 @@ async def initSECRET_KEY(secret_key : str):
 
 def generate_token(pseudonym : str) -> str:
     """ generate a new token for a pseudonym """
-    expiration_time = datetime.datetime.utcnow() + datetime.timedelta(minutes=3)
+    expiration_time = datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
     payload = {
         'pseudonym': pseudonym,
         'exp': expiration_time
@@ -24,8 +26,10 @@ def generate_token(pseudonym : str) -> str:
     return token
 
 def verify_token(token: str) -> str:
+    """ vérify the token and return the pseudonym if the token is correct """
     if not isinstance(token, str):
         logger.error("Token insn't init => user is not connected")
+        return ""
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
         pseudonym = payload.get("pseudonym")
@@ -35,8 +39,8 @@ def verify_token(token: str) -> str:
         logger.info("token is valid")
         return pseudonym
     except jwt.ExpiredSignatureError:
-        logger.error("Token has expired")
+        logger.exception("Token has expired")
         return ""
     except jwt.InvalidTokenError:
-        logger.error("Invalid token")
+        logger.exception("Invalid token")
         return ""
