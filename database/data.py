@@ -1,3 +1,4 @@
+""" this file make all access to the database. """
 #import
 from sqlalchemy import text
 from databases import Database

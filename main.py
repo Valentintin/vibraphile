@@ -1,3 +1,4 @@
+""" this file is the core of the back-end system. this is where the exchange with the front-end append """
 #import
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
@@ -72,7 +73,11 @@ async def websocket_endpoint(websocket: WebSocket):
             logger.debug(f'Response for {data["id"]} call is : {response}')
             await websocket.send_text(json.dumps({"id" : data["id"], "message": response}))
         except WebSocketDisconnect as e:
+            logger.exception("error from the websocket")
             shutdown = True
+        except Exception as e:
+            logger.exception("error from a response process")
+            await websocket.send_text(json.dumps({"id" : data["id"], "message": str(e)}))
 
 #start the server
 if __name__ == "__main__":

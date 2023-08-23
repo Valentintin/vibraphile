@@ -1,3 +1,4 @@
+""" this file permit to configure a token per connection. It's permit to keep the connection """
 #import
 import jwt
 import datetime

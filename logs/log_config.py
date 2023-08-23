@@ -1,3 +1,4 @@
+""" this file configure the logger system of the application """
 import logging
 from logging.config import dictConfig
 
@@ -6,7 +7,7 @@ def init_logger():
 
     LOG_LEVEL: str = "DEBUG"
     FORMAT: str = "%(levelprefix)s%(pathname)s:%(lineno)d - %(asctime)s | %(message)s"
-    LOG_NAME = "musehik"
+    LOG_NAME = "vibraphile"
     logging_config = {
         "version": 1, # mandatory field
         "disable_existing_loggers": False,
