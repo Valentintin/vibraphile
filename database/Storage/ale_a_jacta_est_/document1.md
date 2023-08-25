@@ -1,1 +1,1 @@
-j'aime les biscotes ! 
+ce document atteste qu'il peut être détruit par le boutton delete

@@ -55,6 +55,8 @@ async def websocket_endpoint(websocket: WebSocket):
             response = await db.test_connection(form_=data)
         elif data["id"] == "saveDocument":
             response = await db.save_document(form_=data)
+        elif data["id"] == "deleteDocument":
+            response = await db.delete_document(form_=data)
         elif data["id"] == "retriveDoc":
             response = await db.retrive_doc(form_=data)
         elif data["id"] == "accountCreation":

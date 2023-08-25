@@ -189,6 +189,31 @@ async def save_document(form_ : json) -> str:
         logger.exception("An error occurred\n", exc_info=e)
         raise
 
+async def delete_document(form_ : json) -> str:
+    """ Send request for delete a document """
+    # Verify connexion
+    pseudonym : str = tk.verify_token(form_['Token'])
+    if not pseudonym:
+        return "you need to be connected"
+    # build the path
+    name : str = form_['name']
+    type : str = form_['type']
+    path : str = f"database/Storage/{pseudonym}/{name}.{type}"
+    # Remove in the storage
+    if os.path.exists(path):
+        os.remove(path)
+    # Remove in database
+    try:
+        query : text = text(f"DELETE FROM document WHERE path = '{path}';")
+        await db.execute(query)
+        return {"name" : name}
+    except PostgresError as e:
+        logger.exception("An error occurred from the database\n", exc_info=e)
+        raise
+    except Exception as e:
+        logger.exception("An error occurred\n", exc_info=e)
+        raise
+
 async def retrive_doc(form_ : json) -> str|list:
     """ this function answer to request of documents for a specific user """
     # Verify connexion

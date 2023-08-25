@@ -164,14 +164,42 @@ function retriveDoc(button=null) {
     ws.send(JSON.stringify(input));
 };
 
+function deleteDocument(button) {
+    let row = button.parentNode.parentNode;
+    let type = "md";
+    var input = {
+        "id" : "deleteDocument",
+        "Token" : Token,
+        "name" : row.dataset.nom,
+        "type" : type
+    }
+    title = document.getElementById("file_title");
+    title.textContent = row.dataset.nom;
+    console.log("deleting documents...");
+    ws.send(JSON.stringify(input));
+}
+
+function removeTableRow(documentName) {
+    let table = document.getElementById("doc_list");
+    for (let i = 0; i < table.rows.length; i++) {
+        let row = table.rows[i];
+        if (row.dataset.nom === documentName) {
+            table.deleteRow(i);
+            break;
+        }
+    }
+}
+
 function setDoc(documents) {
     let table = document.getElementById("doc_list");
     for(let row of documents){
         let new_row = table.insertRow(table.rows.length);
         let cell_nom = new_row.insertCell(0);
-        let cell_actions = new_row.insertCell(1);
+        let cell_save = new_row.insertCell(1);
+        let cell_delete = new_row.insertCell(1);
         cell_nom.innerHTML = row;
-        cell_actions.innerHTML = '<button onclick="retriveDoc(this)">edit</button>';
+        cell_save.innerHTML = '<button onclick="retriveDoc(this)">edit</button>';
+        cell_delete.innerHTML = '<button onclick="deleteDocument(this)">delete</button>';
         new_row.dataset.nom = row;
     }
 };
@@ -197,7 +225,7 @@ ws.onmessage = (event) => {
             retriveDoc();
         }
     }
-    if (message["id"] == "retriveDoc"){
+    if (message["id"] === "retriveDoc"){
         if (typeof(message["message"]) === typeof([]) ){
             setDoc(message["message"]);
         }
@@ -206,6 +234,13 @@ ws.onmessage = (event) => {
                 console.log(document.getElementById('markdown-editor'))
                 easymde.value(message["message"]);
             }
+        }
+    }
+    if (message["id"] === "deleteDocument"){
+        //verify delete is correct
+        if (message["message"]["name"] !== undefined){
+            //erase the row
+        removeTableRow(message["message"]["name"]);
         }
     }
 };
