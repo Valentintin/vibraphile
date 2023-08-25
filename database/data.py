@@ -45,7 +45,7 @@ async def close_connection():
 
 ### Account ###
 
-async def connection(form_ : json) -> str|dict:
+async def connection(form_ : json) -> dict:
     """ Send request for connection """
     mail : str = form_['mail']
     password : str = form_['password']
@@ -202,9 +202,12 @@ async def retrive_doc(form_ : json) -> str|list:
             doc_result = await db.fetch_one(doc_query)
             if not doc_result:
                 return "no documents..."
-            with open(doc_result.path, "r") as f:
-                doc_content = f.read()
-            return doc_content
+            if os.path.exists(doc_result.path):
+                with open(doc_result.path, "r") as f:
+                    doc_content = f.read()
+                return doc_content
+            else:
+                return "the documents is lost in storage... contact an admin"
         else:
             doc_query = text(f"SELECT name FROM Document WHERE pseudonym = '{pseudonym}'")
             doc_result = await db.fetch_all(doc_query)

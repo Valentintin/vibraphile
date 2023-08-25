@@ -27,7 +27,7 @@ async def startup():
     await db.init_connection()
 
 @app.on_event("shutdown")
-async def shutdown():
+async def shutdown_event():
     """ event call on the shutdown of the application """
     await db.close_connection()
 
@@ -45,36 +45,39 @@ async def connexion(request: Request):
 async def websocket_endpoint(websocket: WebSocket):
     """ websocket bilateral communication """
     await websocket.accept()
-    shutdown : bool = False
     response : str = ""
-    while not shutdown:
-        try:
-            #receive from the front
-            data : json = await websocket.receive_json()
-            if data["id"] == "connection":
-                response = await db.connection(form_=data)
-            elif data["id"] == "testConnection":
-                response = await db.test_connection(form_=data)
-            elif data["id"] == "saveDocument":
-                response = await db.save_document(form_=data)
-            elif data["id"] == "retriveDoc":
-                response = await db.retrive_doc(form_=data)
-            elif data["id"] == "accountCreation":
-                response = await db.account_creation(form_=data)
-            elif data["id"] == "accountDelete":
-                response = await db.account_delete(form_=data)
-            elif data["id"] == "modifyAccount":
-                response = await db.modify_account(form_=data)
-            else:
-                logger.error("back-end not yet implemented")
-                break
 
-            #answer to the front
+    async def process_response(data : json):
+        """ this function make the route with the fonction used in data """
+        if data["id"] == "connection":
+            response = await db.connection(form_=data)
+        elif data["id"] == "testConnection":
+            response = await db.test_connection(form_=data)
+        elif data["id"] == "saveDocument":
+            response = await db.save_document(form_=data)
+        elif data["id"] == "retriveDoc":
+            response = await db.retrive_doc(form_=data)
+        elif data["id"] == "accountCreation":
+            response = await db.account_creation(form_=data)
+        elif data["id"] == "accountDelete":
+            response = await db.account_delete(form_=data)
+        elif data["id"] == "modifyAccount":
+            response = await db.modify_account(form_=data)
+        else:
+            logger.error("back-end not yet implemented")
+            response = "back-end not yet implemented"
+        return response
+
+    while True:
+        try:
+            data: json = await websocket.receive_json()#from the front
+
+            response = await process_response(data)
+
             logger.debug(f'Response for {data["id"]} call is : {response}')
-            await websocket.send_text(json.dumps({"id" : data["id"], "message": response}))
-        except WebSocketDisconnect as e:
-            logger.exception("error from the websocket")
-            shutdown = True
+            await websocket.send_text(json.dumps({"id" : data["id"], "message": response}))#to the front
+        except WebSocketDisconnect:
+            break
         except Exception as e:
             logger.exception("error from a response process")
             await websocket.send_text(json.dumps({"id" : data["id"], "message": str(e)}))
