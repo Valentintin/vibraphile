@@ -134,14 +134,16 @@ async def modify_account(form_ : json) -> str:
     """ Send request for modify an Account """
     pseudonym : str = tk.verify_token(form_['Token'])
     if pseudonym:
-        pass
         # see what to modify
         info_modify : str = form_["infoModify"]
         modification : str = form_["modification"]
         logger.debug(f"infoModify : {info_modify} && modification : {modification}")
         # modify the information
-        try:
+        if info_modify == "password":
+            query : text = text(f"UPDATE account SET {info_modify} = crypt('{modification}', password) WHERE pseudonym = '{pseudonym}';")
+        else:
             query : text = text(f"UPDATE account SET {info_modify} = '{modification}' WHERE pseudonym = '{pseudonym}';")
+        try:
             await db.execute(query)
             return "Info updated successfully !"
         except PostgresError as e:

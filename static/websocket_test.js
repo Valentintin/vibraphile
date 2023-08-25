@@ -192,8 +192,10 @@ ws.onmessage = (event) => {
     console.log('from the back for', message["id"] + '\n', message["message"]);
     if (message["id"] == "connection"){
         Token = message["message"]["Token"];
-        document.cookie = Token;
-        retriveDoc();
+        if(Token !== undefined){
+            document.cookie = Token;
+            retriveDoc();
+        }
     }
     if (message["id"] == "retriveDoc"){
         if (typeof(message["message"]) === typeof([]) ){
