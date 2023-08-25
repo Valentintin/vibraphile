@@ -1,4 +1,5 @@
 const ws = new WebSocket("ws://localhost:8000/ws");
+
 let Token = document.cookie
 
 const easymde = new EasyMDE({
@@ -179,19 +180,11 @@ function deleteDocument(button) {
     ws.send(JSON.stringify(input));
 }
 
-function removeTableRow(documentName) {
-    let table = document.getElementById("doc_list");
-    for (let i = 0; i < table.rows.length; i++) {
-        let row = table.rows[i];
-        if (row.dataset.nom === documentName) {
-            table.deleteRow(i);
-            break;
-        }
-    }
-}
-
 function setDoc(documents) {
     let table = document.getElementById("doc_list");
+    while (table.rows.length > 0) {
+        table.deleteRow(0); // Supprime la première ligne à chaque itération
+    }
     for(let row of documents){
         let new_row = table.insertRow(table.rows.length);
         let cell_nom = new_row.insertCell(0);
@@ -236,11 +229,7 @@ ws.onmessage = (event) => {
             }
         }
     }
-    if (message["id"] === "deleteDocument"){
-        //verify delete is correct
-        if (message["message"]["name"] !== undefined){
-            //erase the row
-        removeTableRow(message["message"]["name"]);
-        }
+    if (message["id"] === "deleteDocument" || message["id"] === "saveDocument"){
+        retriveDoc();
     }
 };
