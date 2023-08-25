@@ -52,7 +52,7 @@ async def websocket_endpoint(websocket: WebSocket):
             #receive from the front
             data : json = await websocket.receive_json()
             if data["id"] == "connection":
-                response = await db.sendFormConnection(form_=data)
+                response = await db.connection(form_=data)
             elif data["id"] == "testConnection":
                 response = await db.test_connection(form_=data)
             elif data["id"] == "saveDocument":

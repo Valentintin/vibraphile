@@ -182,7 +182,7 @@ ws.onopen = () => {
 };
 
 // close connection event
-ws.onclose = (event) => {
+ws.onclose = () => {
     console.log('Disconnected at the websocket');
 };
 
@@ -196,7 +196,7 @@ ws.onmessage = (event) => {
         retriveDoc();
     }
     if (message["id"] == "retriveDoc"){
-        if (typeof message["message"] === typeof [] ){
+        if (typeof(message["message"]) === typeof([]) ){
             setDoc(message["message"]);
         }
         else{

@@ -45,7 +45,7 @@ async def close_connection():
 
 ### Account ###
 
-async def sendFormConnection(form_ : json) -> str|dict:
+async def connection(form_ : json) -> str|dict:
     """ Send request for connection """
     mail : str = form_['mail']
     password : str = form_['password']
