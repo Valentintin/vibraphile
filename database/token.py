@@ -1,23 +1,28 @@
-""" this file permit to configure a token per connection. It's permit to keep the connection """
-#import
+""" this file permit to configure a token per connection.
+It's permit to keep the connection """
+# import
 import jwt
 import datetime
-
-SECRET_KEY : str = None
-
-#logger
 from logging import getLogger
-logger = getLogger("musehik")
 
-async def init_SECRET_KEY(secret_key : str):
+SECRET_KEY: str = None
+
+
+# logger
+logger = getLogger("vibraphile")
+
+
+async def init_SECRET_KEY(secret_key: str):
     """ init the SECRET_KEY used for security of token """
     global SECRET_KEY
     SECRET_KEY = secret_key
     logger.info("SECRET_KEY init")
 
-def generate_token(pseudonym : str) -> str:
+
+def generate_token(pseudonym: str) -> str:
     """ generate a new token for a pseudonym """
-    expiration_time = datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+    expiration_time = datetime.datetime.utcnow()
+    + datetime.timedelta(minutes=30)
     payload = {
         'pseudonym': pseudonym,
         'exp': expiration_time
@@ -25,6 +30,7 @@ def generate_token(pseudonym : str) -> str:
     token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
     logger.debug(f"token generate for {pseudonym} ")
     return token
+
 
 def verify_token(token: str) -> str:
     """ vérify the token and return the pseudonym if the token is correct """
