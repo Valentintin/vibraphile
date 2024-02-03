@@ -1,7 +1,7 @@
 CREATE TABLE Account(
    pseudonym VARCHAR(16) ,
    email VARCHAR(50) NOT NULL,
-   password BYTEA NOT NULL,
+   password VARCHAR(50) NOT NULL,
    createdAt DATE NOT NULL,
    lastLoginAt DATE NOT NULL,
    birthDate DATE NOT NULL,
@@ -55,4 +55,4 @@ CREATE TABLE Evaluate(
 
 /* for crypting password */
 CREATE EXTENSION pgcrypto;
-SELECT * FROM pg_available_extensions;
+-- SELECT * FROM pg_available_extensions;
