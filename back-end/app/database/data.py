@@ -18,13 +18,16 @@ logger = getLogger("vibraphile")
 # setup
 async def init_connection():
     """ initialise the connection at the database """
-    if not os.path.exists('database/config.json'):
-        logger.debug("""You need to have the file config.json in database/.
-        Answer access from a developper""")
+    if not os.path.exists('app/database/config.json'):
+        logger.debug("need to have the file config.json in database/."
+                     " Answer access from a developper.")
         return
-    with open('database/config.json') as config_connection:
+    with open('app/database/config.json') as config_connection:
         connect_info: json = json.load(config_connection)
-    DATABASE_URL: str = f'postgresql://{connect_info["user"]}:{connect_info["password"]}@{connect_info["host"]}:{connect_info["port"]}/{connect_info["database"]}'
+    DATABASE_URL: str = f'postgresql://{connect_info["user"]}:'\
+                        f'{connect_info["password"]}@{connect_info["host"]}:'\
+                        f'{connect_info["port"]}/{connect_info["database"]}'
+    logger.debug(DATABASE_URL)
     await tk.init_SECRET_KEY(connect_info["password"])
     global db
     db = Database(DATABASE_URL)

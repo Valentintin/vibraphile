@@ -6,7 +6,8 @@ def init_logger():
     """Function that init the logger object that's properly setup"""
 
     LOG_LEVEL: str = "DEBUG"
-    FORMAT: str = "%(levelprefix)s%(pathname)s:%(lineno)d - %(asctime)s | %(message)s"
+    FORMAT: str = "%(levelprefix)s%(pathname)s:%(lineno)d - %(asctime)s |"\
+                  " %(message)s"
     logging_config = {
         "version": 1,  # mandatory field
         "disable_existing_loggers": False,

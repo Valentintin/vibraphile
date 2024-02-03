@@ -19,18 +19,18 @@ init_logger()
 logger = getLogger("vibraphile")
 
 
-# setup app
-app = FastAPI()
-templates = Jinja2Templates(directory="app/templates")
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """ lifespan define what to do before launch, and before close """
     await db.init_connection()
     yield
     await db.close_connection()
+
+
+# setup app
+app = FastAPI(lifespan=lifespan)
+templates = Jinja2Templates(directory="app/templates")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
 @app.get("/")
