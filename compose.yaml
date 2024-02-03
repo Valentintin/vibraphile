@@ -1,0 +1,16 @@
+services:
+  back:
+    build: ./back-end
+    container_name: vibra-back
+    ports:
+      - "80:80"
+    volumes:
+      - ./back-end:/code
+  db:
+    image: postgres:latest
+    container_name: vibra-base
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: local
