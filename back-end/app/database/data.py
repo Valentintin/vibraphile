@@ -7,7 +7,8 @@ from logging import getLogger
 import json
 import os
 
-import database.token as tk
+import database.web_token as tk
+# import database.model as ml
 
 db: Database = None
 
@@ -27,7 +28,6 @@ async def init_connection():
     DATABASE_URL: str = f'postgresql://{connect_info["user"]}:'\
                         f'{connect_info["password"]}@{connect_info["host"]}:'\
                         f'{connect_info["port"]}/{connect_info["database"]}'
-    logger.debug(DATABASE_URL)
     await tk.init_SECRET_KEY(connect_info["password"])
     global db
     db = Database(DATABASE_URL)
