@@ -7,7 +7,7 @@ from logging import getLogger
 import json
 import os
 
-import database.token as tk
+import web_token.token as tk
 
 db: Database = None
 
@@ -17,7 +17,7 @@ logger = getLogger("vibraphile")
 
 # setup
 async def init_connection():
-    """ initialise the connection at the database """
+    """ initialise the tkconnection at the database """
     if not os.path.exists('app/database/config.json'):
         logger.debug("need to have the file config.json in database/."
                      " Answer access from a developper.")
@@ -27,7 +27,6 @@ async def init_connection():
     DATABASE_URL: str = f'postgresql://{connect_info["user"]}:'\
                         f'{connect_info["password"]}@{connect_info["host"]}:'\
                         f'{connect_info["port"]}/{connect_info["database"]}'
-    logger.debug(DATABASE_URL)
     await tk.init_SECRET_KEY(connect_info["password"])
     global db
     db = Database(DATABASE_URL)
