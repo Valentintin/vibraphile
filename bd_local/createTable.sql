@@ -1,5 +1,4 @@
 /* this file contain the model of the data in sql... for every modification here, change model.py */
-/* use omymodels for updating model.py and schema.py from this file... */
 
 CREATE TABLE Account(
    pseudonym VARCHAR(16) ,

@@ -7,8 +7,7 @@ from logging import getLogger
 import json
 import os
 
-import database.web_token as tk
-# import database.model as ml
+import web_token.token as tk
 
 db: Database = None
 
@@ -18,7 +17,7 @@ logger = getLogger("vibraphile")
 
 # setup
 async def init_connection():
-    """ initialise the connection at the database """
+    """ initialise the tkconnection at the database """
     if not os.path.exists('app/database/config.json'):
         logger.debug("need to have the file config.json in database/."
                      " Answer access from a developper.")

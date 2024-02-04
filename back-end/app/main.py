@@ -23,7 +23,6 @@ logger = getLogger("vibraphile")
 async def lifespan(app: FastAPI):
     """ lifespan define what to do before launch, and before close """
     await db.init_connection()
-    await db.update_model_from_sql()
     yield
     await db.close_connection()
 
