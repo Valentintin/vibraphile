@@ -20,7 +20,7 @@ CREATE TABLE Document(
    fileSize INTEGER NOT NULL,
    createdAt DATE NOT NULL,
    lastModifiedAt DATE NOT NULL,
-   lastVisitedAt VARCHAR(50) NOT NULL,
+   lastVisitedAt DATE NOT NULL,
    description VARCHAR(254) ,
    pseudonym VARCHAR(16) NOT NULL,
    PRIMARY KEY(path),

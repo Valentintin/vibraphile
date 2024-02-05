@@ -1,7 +1,6 @@
 fastapi[all]
 sqlalchemy
-omymodels
-databases
+sqlmodel
 asyncpg
 six
 requests

@@ -1,16 +1,14 @@
 """ this file is the core of the back-end system. this is where the exchange
 with the front-end append """
 # import
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Request  # , WebSocket, WebSocketDisconnect
 from contextlib import asynccontextmanager
-# from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-# import markdown
-import json
 import uvicorn
 
-import database.data as db
+import database.bd_setup as bd_setup
+from database.model import UserIn
 
 # logger
 from logs.log_config import init_logger
@@ -22,9 +20,8 @@ logger = getLogger("vibraphile")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """ lifespan define what to do before launch, and before close """
-    await db.init_connection()
+    await bd_setup.init_connection()
     yield
-    await db.close_connection()
 
 
 # setup app
@@ -45,52 +42,57 @@ async def connexion(request: Request):
     return templates.TemplateResponse('connexion.html', {"request": request})
 
 
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    """ websocket bilateral communication """
-    await websocket.accept()
-    response: str = ""
+@app.post("/Account/login")
+async def login(userIn: UserIn) -> str:
+    return await bd_setup.connection(userIn.email, userIn.password)
 
-    async def process_response(data: json):
-        """ this function make the route with the fonction used in data """
-        if data["id"] == "connection":
-            response = await db.connection(form_=data)
-        elif data["id"] == "testConnection":
-            response = await db.test_connection(form_=data)
-        elif data["id"] == "saveDocument":
-            response = await db.save_document(form_=data)
-        elif data["id"] == "deleteDocument":
-            response = await db.delete_document(form_=data)
-        elif data["id"] == "retriveDoc":
-            response = await db.retrive_doc(form_=data)
-        elif data["id"] == "accountCreation":
-            response = await db.account_creation(form_=data)
-        elif data["id"] == "accountDelete":
-            response = await db.account_delete(form_=data)
-        elif data["id"] == "modifyAccount":
-            response = await db.modify_account(form_=data)
-        else:
-            logger.error("back-end not yet implemented")
-            response = "back-end not yet implemented"
-        return response
 
-    while True:
-        try:
-            data: json = await websocket.receive_json()  # from the front
+# @app.websocket("/ws")
+# async def websocket_endpoint(websocket: WebSocket):
+#     """ websocket bilateral communication """
+#     await websocket.accept()
+#     response: str = ""
 
-            response = await process_response(data)
+#     async def process_response(data: json):
+#         """ this function make the route with the fonction used in data """
+#         if data["id"] == "connection":
+#             response = await db.connection(form_=data)
+#         elif data["id"] == "testConnection":
+#             response = await db.test_connection(form_=data)
+#         elif data["id"] == "saveDocument":
+#             response = await db.save_document(form_=data)
+#         elif data["id"] == "deleteDocument":
+#             response = await db.delete_document(form_=data)
+#         elif data["id"] == "retriveDoc":
+#             response = await db.retrive_doc(form_=data)
+#         elif data["id"] == "accountCreation":
+#             response = await db.account_creation(form_=data)
+#         elif data["id"] == "accountDelete":
+#             response = await db.account_delete(form_=data)
+#         elif data["id"] == "modifyAccount":
+#             response = await db.modify_account(form_=data)
+#         else:
+#             logger.error("back-end not yet implemented")
+#             response = "back-end not yet implemented"
+#         return response
 
-            logger.debug(f'Response for {data["id"]} call is : {response}')
-            await websocket.send_text(json.dumps({
-                "id": data["id"],
-                "message": response}))  # to the front
-        except WebSocketDisconnect:
-            break
-        except Exception as e:
-            logger.exception("error from a response process")
-            await websocket.send_text(json.dumps({
-                "id": data["id"],
-                "message": str(e)}))
+#     while True:
+#         try:
+#             data: json = await websocket.receive_json()  # from the front
+
+#             response = await process_response(data)
+
+#             logger.debug(f'Response for {data["id"]} call is : {response}')
+#             await websocket.send_text(json.dumps({
+#                 "id": data["id"],
+#                 "message": response}))  # to the front
+#         except WebSocketDisconnect:
+#             break
+#         except Exception as e:
+#             logger.exception("error from a response process")
+#             await websocket.send_text(json.dumps({
+#                 "id": data["id"],
+#                 "message": str(e)}))
 
 # start the server
 if __name__ == "__main__":
