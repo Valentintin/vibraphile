@@ -1,7 +1,12 @@
 from typing import Any, Dict, Generic, Optional, Type, TypeVar, Union
 
 from fastapi.encoders import jsonable_encoder
-from sqlmodel import SQLModel, Session
+from sqlmodel import SQLModel, Session, select
+from asyncpg.exceptions import PostgresError
+from logging import getLogger
+
+# logger
+logger = getLogger("vibraphile")
 
 ModelType = TypeVar("ModelType", bound=Any)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=SQLModel)
@@ -22,6 +27,19 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
     def get(self, db: Session, id: Any) -> Optional[ModelType]:
         return db.query(self.model).filter(self.model.id == id).first()
+
+    def get_all(self, db: Session) -> Optional[ModelType]:
+        try:
+            id_name: str = self.model.__table__.primary_key.columns.keys()[0]
+            return db.execute(select(getattr(self.model, id_name)),
+                              execution_options={"prebuffer_rows": True})
+        except PostgresError as e:
+            logger.exception("An error occurred from the database\n",
+                             exc_info=e)
+            raise
+        except Exception as e:
+            logger.exception("An error occurred\n", exc_info=e)
+            raise
 
     def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
         obj_in_data = jsonable_encoder(obj_in)

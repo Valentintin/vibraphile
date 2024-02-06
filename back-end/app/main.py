@@ -9,6 +9,8 @@ import uvicorn
 
 import database.bd_setup as bd_setup
 from database.model import UserIn
+from routers import accounts
+from web_token.token import init_SECRET_KEY
 
 # logger
 from logs.log_config import init_logger
@@ -21,6 +23,7 @@ logger = getLogger("vibraphile")
 async def lifespan(app: FastAPI):
     """ lifespan define what to do before launch, and before close """
     await bd_setup.init_connection()
+    await init_SECRET_KEY()
     yield
 
 
@@ -28,6 +31,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 templates = Jinja2Templates(directory="app/templates")
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.include_router(accounts.router)
 
 
 @app.get("/")

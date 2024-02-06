@@ -2,7 +2,8 @@
 It's permit to keep the connection """
 # import
 import jwt
-import datetime
+from datetime import datetime, timezone, timedelta
+import uuid
 from logging import getLogger
 
 SECRET_KEY: str = None
@@ -12,7 +13,7 @@ SECRET_KEY: str = None
 logger = getLogger("vibraphile")
 
 
-async def init_SECRET_KEY(secret_key: str):
+async def init_SECRET_KEY(secret_key: str = str(uuid.uuid4())):
     """ init the SECRET_KEY used for security of token """
     global SECRET_KEY
     SECRET_KEY = secret_key
@@ -21,8 +22,9 @@ async def init_SECRET_KEY(secret_key: str):
 
 def generate_token(pseudonym: str) -> str:
     """ generate a new token for a pseudonym """
-    expiration_time = datetime.datetime.utcnow()
-    + datetime.timedelta(minutes=30)
+    expiration_time = (datetime.now(tz=timezone.utc)
+                       + timedelta(hours=1, minutes=30)).timestamp()
+    logger.debug("expiration_time: " + str(expiration_time))
     payload = {
         'pseudonym': pseudonym,
         'exp': expiration_time

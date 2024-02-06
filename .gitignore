@@ -1,8 +1,5 @@
 __pycache__/
 
-#config connexion
-database/config.json
-
 # Jupyter Notebook
 .ipynb_checkpoints
 

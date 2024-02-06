@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.orm import sessionmaker
 
 from database.model import Account
-import web_token.token as tk
+from web_token.token import generate_token
 from logging import getLogger
 import json
 import os
@@ -49,7 +49,6 @@ async def init_connection():
                                  pool_size=20,
                                  max_overflow=20,
                                  pool_recycle=3600)
-    await tk.init_SECRET_KEY(DATABASE_URL)
     await test_database_connection()
 
 
@@ -77,13 +76,13 @@ async def connection(email: Account.email,
                            " AND password = crypt(:password, password);")
         params: dict = {'email': email, 'password': password}
         async with get_session() as session:
-            results = await session.select(query, params)
+            results = await session.execute(query, params)
             finded = dict(results.fetchone()._mapping)
         if finded is None:
             return "bad email or password..."
         else:
             # Treat the results before send it
-            return tk.generate_token(finded['pseudonym'])
+            return generate_token(finded['pseudonym'])
     except PostgresError as e:
         logger.exception("An error occurred from the dataBase\n",
                          exc_info=e)
