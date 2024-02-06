@@ -26,7 +26,18 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self.model = model
 
     def get(self, db: Session, id: Any) -> Optional[ModelType]:
-        return db.query(self.model).filter(self.model.id == id).first()
+        try:
+            id_name: str = self.model.__table__.primary_key.columns.keys()[0]
+            return db.execute(select(self.model).filter(
+                getattr(self.model, id_name) == id),
+                execution_options={"prebuffer_rows": True}).first()
+        except PostgresError as e:
+            logger.exception("An error occurred from the database\n",
+                             exc_info=e)
+            raise
+        except Exception as e:
+            logger.exception("An error occurred\n", exc_info=e)
+            raise
 
     def get_all(self, db: Session) -> Optional[ModelType]:
         try:
