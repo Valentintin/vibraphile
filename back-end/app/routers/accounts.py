@@ -33,8 +33,6 @@ async def read_accounts() -> list[str]:
             tmp_dict = dict(row._mapping)
             res.append("/accounts/"+tmp_dict.get('pseudonym'))
         return res
-    except IntegrityError:
-        raise HTTPException(400, detail="pseudo or email already used...")
     except Exception as e:
         raise HTTPException(500, str(e))
 
@@ -44,8 +42,14 @@ async def create_account(new_account: Account) -> str:
     """
     create a new account !
     """
-    async with get_session() as session:
-        return await session.run_sync(bd_account.create, obj_in=new_account)
+    try:
+        async with get_session() as session:
+            return await session.run_sync(bd_account.create,
+                                          obj_in=new_account)
+    except IntegrityError:
+        raise HTTPException(400, detail="pseudo or email already used...")
+    except Exception as e:
+        raise HTTPException(500, str(e))
 
 
 @router.get("/{pseudonym}")
@@ -61,5 +65,31 @@ async def read_account(pseudonym: str) -> Account:
         res: Account = results[0]
         res.password = "..."
         return res
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+
+@router.delete("/{pseudonym}")
+async def delete_account(pseudonym: str) -> Account:
+    """
+    delete the account by pseudonym
+    """
+    try:
+        async with get_session() as session:
+            return await session.run_sync(bd_account.remove, id=pseudonym)
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+
+@router.put("/{pseudonym}")
+async def update_account(pseudonym: str,
+                         obj_in: Account | dict) -> Account:
+    """
+    update the account
+    """
+    try:
+        async with get_session() as session:
+            return await session.run_sync(bd_account.update,
+                                          pseudonym, obj_in=obj_in)
     except Exception as e:
         raise HTTPException(500, str(e))

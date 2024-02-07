@@ -11,10 +11,10 @@ class UserIn(SQLModel):
 class Account(SQLModel, table=True, arbitrary_types_allowed=True):
     pseudonym: str = Field(primary_key=True)
     email: Optional[str] = None
-    password: Optional[str]
+    password: Optional[str] = None
     createdat: Optional[datetime] = None
     lastloginat: Optional[datetime] = None
-    birthdate: datetime
+    birthdate: datetime = None
     picture: Optional[str] = None
     biography: Optional[str] = None
 
