@@ -1,13 +1,10 @@
 """ this file configure setup for connecting with BD """
 from contextlib import asynccontextmanager
-from asyncpg.exceptions import PostgresError
 from sqlmodel import text
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.orm import sessionmaker
 
-from database.model import Account
-from web_token.token import generate_token
 from logging import getLogger
 import json
 import os
@@ -32,7 +29,7 @@ async def test_database_connection():
 async def init_connection():
     """ initialise the tkconnection at the database """
     if not os.path.exists('app/database/config.json'):
-        logger.debug("need to have the file config.json in database/."
+        logger.error("need to have the file config.json in database/."
                      " Answer access from a developper.")
         return
     with open('app/database/config.json') as config_connection:
@@ -66,27 +63,3 @@ async def get_session() -> AsyncSession:
                                  expire_on_commit=False)
     async with async_session() as session:
         yield session
-
-
-async def connection(email: Account.email,
-                     password: Account.password) -> dict:
-    """ Send request for connection """
-    try:
-        query: text = text("SELECT pseudonym FROM Account WHERE email = :email"
-                           " AND password = crypt(:password, password);")
-        params: dict = {'email': email, 'password': password}
-        async with get_session() as session:
-            results = await session.execute(query, params)
-            finded = dict(results.fetchone()._mapping)
-        if finded is None:
-            return "bad email or password..."
-        else:
-            # Treat the results before send it
-            return generate_token(finded['pseudonym'])
-    except PostgresError as e:
-        logger.exception("An error occurred from the dataBase\n",
-                         exc_info=e)
-        raise
-    except Exception as e:
-        logger.exception("An error occurred\n", exc_info=e)
-        raise

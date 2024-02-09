@@ -3,11 +3,6 @@ from sqlmodel import Field, SQLModel
 from datetime import datetime
 
 
-class UserIn(SQLModel):
-    email: str
-    password: str
-
-
 class Account(SQLModel, table=True, arbitrary_types_allowed=True):
     pseudonym: str = Field(primary_key=True)
     email: Optional[str] = None

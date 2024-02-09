@@ -13,7 +13,6 @@ bd_account: Bd_account = Bd_account(Account)
 router = APIRouter(
     prefix="/accounts",
     tags=["accounts"],
-    dependencies=[Depends(verify_token)],
     responses={404: {"description": "Not found"}},
 )
 
@@ -52,44 +51,58 @@ async def create_account(new_account: Account) -> str:
         raise HTTPException(500, str(e))
 
 
-@router.get("/{pseudonym}")
-async def read_account(pseudonym: str) -> Account:
+@router.post("/login")
+async def login(email: str, password: str) -> str:
+    try:
+        async with get_session() as session:
+            return await session.run_sync(bd_account.connection,
+                                          email, password)
+    except IntegrityError:
+        raise HTTPException(400, detail="pseudo or email already used...")
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+
+@router.get("/{pseudonym}", dependencies=[Depends(verify_token)])
+async def read_account(pseudonym: str) -> dict:
     """
     return the accounts
     """
     try:
         async with get_session() as session:
-            results = await session.run_sync(bd_account.get, pseudonym)
-        if results is None:
+            res: Account = await session.run_sync(bd_account.get, pseudonym)
+        if res is None:
             raise HTTPException(404)
-        res: Account = results[0]
-        res.password = "..."
-        return res
+        return res.model_dump(exclude={'password': True})
     except Exception as e:
         raise HTTPException(500, str(e))
 
 
-@router.delete("/{pseudonym}")
-async def delete_account(pseudonym: str) -> Account:
-    """
-    delete the account by pseudonym
-    """
-    try:
-        async with get_session() as session:
-            return await session.run_sync(bd_account.remove, id=pseudonym)
-    except Exception as e:
-        raise HTTPException(500, str(e))
-
-
-@router.put("/{pseudonym}")
+@router.put("/{pseudonym}", dependencies=[Depends(verify_token)])
 async def update_account(pseudonym: str,
-                         obj_in: Account | dict) -> Account:
+                         obj_in: dict) -> dict:
     """
     update the account
     """
     try:
         async with get_session() as session:
-            return await session.run_sync(bd_account.update,
-                                          pseudonym, obj_in=obj_in)
+            res: Account = await session.run_sync(bd_account.update,
+                                                  pseudonym=pseudonym,
+                                                  obj_in=obj_in)
+        return res.model_dump(exclude={'password': True})
+    except Exception as e:
+        raise HTTPException(500, str(e))
+
+
+@router.delete("/{pseudonym}", dependencies=[Depends(verify_token)])
+async def delete_account(pseudonym: str) -> dict:
+    """
+    delete the account by pseudonym
+    """
+    try:
+        async with get_session() as session:
+            res: Account = await session.run_sync(bd_account.remove,
+                                                  id=pseudonym)
+        return res.model_dump(exclude={'password': True})
     except Exception as e:
         raise HTTPException(500, str(e))

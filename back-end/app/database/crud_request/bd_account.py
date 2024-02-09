@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from logging import getLogger
 from database.crud_request.base import CRUDBase
 from database.model import Account
+from web_token.token import generate_token
 from sqlmodel import Session, text
 from datetime import datetime
 import os
@@ -16,6 +17,29 @@ class Bd_account(CRUDBase[Account, Account, Account]):
     """
     process request to for account BD, using CRUD system
     """
+    def connection(self, db: Session, email: str, password: str) -> dict:
+        """ Send request for connection """
+        try:
+            query: text = text("SELECT pseudonym FROM Account WHERE "
+                               "email = :email AND "
+                               "password = crypt(:password, password);")
+            params: dict = {'email': email, 'password': password}
+            results = db.execute(query, params)
+            res = results.first()
+            if res is None:
+                return "bad email or password..."
+            else:
+                finded = dict(res._mapping)
+                # Treat the results before send it
+                return generate_token(finded['pseudonym'])
+        except PostgresError as e:
+            logger.exception("An error occurred from the dataBase\n",
+                             exc_info=e)
+            raise
+        except Exception as e:
+            logger.exception("An error occurred\n", exc_info=e)
+            raise
+
     def create(self, db: Session, *, obj_in: Account) -> str:
         try:
             email: str = obj_in.email
@@ -48,13 +72,13 @@ class Bd_account(CRUDBase[Account, Account, Account]):
             raise
 
     def update(self, db: Session, *,
-               db_obj: Account,
+               pseudonym: str,
                obj_in: Account | dict[str, any]) -> Account:
         try:
             if not isinstance(obj_in, dict):
                 obj_in: dict = obj_in.dict(exclude_unset=True)
             if 'password' in obj_in.keys():
-                db_obj.password = obj_in.get('password')
+                logger.debug("password update")
                 query: text = text("UPDATE account SET password = "
                                    "crypt(:password, gen_salt('bf')) "
                                    "WHERE pseudonym = :pseudonym;")
@@ -63,6 +87,7 @@ class Bd_account(CRUDBase[Account, Account, Account]):
                 db.execute(query, params)
                 db.commit()
                 obj_in.pop('password')
+            db_obj = self.get(db, pseudonym)
             return super().update(db, db_obj=db_obj, obj_in=obj_in)
         except IntegrityError as e:
             if "duplicate key value violates unique constraint" in str(e):

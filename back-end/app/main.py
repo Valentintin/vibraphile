@@ -8,7 +8,6 @@ from fastapi.staticfiles import StaticFiles
 import uvicorn
 
 import database.bd_setup as bd_setup
-from database.model import UserIn
 from routers import accounts
 from web_token.token import init_SECRET_KEY
 
@@ -44,11 +43,6 @@ async def home(request: Request):
 async def connexion(request: Request):
     """ used for load a page """
     return templates.TemplateResponse('connexion.html', {"request": request})
-
-
-@app.post("/Account/login")
-async def login(userIn: UserIn) -> str:
-    return await bd_setup.connection(userIn.email, userIn.password)
 
 
 # @app.websocket("/ws")

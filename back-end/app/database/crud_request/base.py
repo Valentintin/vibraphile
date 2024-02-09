@@ -28,9 +28,11 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def get(self, db: Session, id: Any) -> Optional[ModelType]:
         try:
             id_name: str = self.model.__table__.primary_key.columns.keys()[0]
-            return db.execute(select(self.model).filter(
+            res = db.execute(select(self.model).filter(
                 getattr(self.model, id_name) == id),
                 execution_options={"prebuffer_rows": True}).first()
+            if res is not None:
+                return res[0]
         except PostgresError as e:
             logger.exception("An error occurred from the database\n",
                              exc_info=e)
@@ -67,12 +69,11 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db_obj: ModelType,
         obj_in: Union[UpdateSchemaType, Dict[str, Any]]
     ) -> ModelType:
-        obj_data = jsonable_encoder(db_obj)
         if isinstance(obj_in, dict):
             update_data = obj_in
         else:
             update_data = obj_in.dict(exclude_unset=True)
-        for field in obj_data:
+        for field in self.model.__table__.columns.keys():
             if field in update_data:
                 setattr(db_obj, field, update_data[field])
         db.add(db_obj)
